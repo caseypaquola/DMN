@@ -1,7 +1,7 @@
 THE DEFAULT MODE NETWORK
 ----------------------------------------------
 
-.. image:: ./figure_methods_overview.png?raw=true
+.. image:: ./figures/figure_methods_overview.png?raw=true
     :align: center
     :scale: 50%
 
