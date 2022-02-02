@@ -1,11 +1,8 @@
 THE DEFAULT MODE NETWORK
 ----------------------------------------------
 
-.. image:: https://raw.githubusercontent.com/caseypaquola/DMN/figures/figure_methods_overview.png
-    :align: center
-    :scale: 50%
+![Alt text](figures/figure_methods_overview.png?raw=true "Title")
 
-.. raw:: html
 
 Custom scripts to reproduce the analyses in "The Unique Cytoarchiecture and Wiring of the Human Default Mode Network"
  
