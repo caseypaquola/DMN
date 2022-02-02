@@ -1,7 +1,7 @@
 THE DEFAULT MODE NETWORK
 ----------------------------------------------
 
-.. image:: ./figures/figure_methods_overview.png?raw=true
+.. image:: https://raw.githubusercontent.com/caseypaquola/DMN/figures/figure_methods_overview.png
     :align: center
     :scale: 50%
 
