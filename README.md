@@ -15,6 +15,6 @@ Dependencies:
 - Functional network atlas: Yeo2011_7Networks_N1000 (https://github.com/ThomasYeoLab/CBIG/blob/master/stable_projects/brain_parcellation/Yeo2011_fcMRI_clustering/1000subjects_reference/Yeo_JNeurophysiol11_SplitLabels/fsaverage5/label/)
 - Von Economo atlas on fsaverage (http://www.dutchconnectomelab.nl/economo/)
 
-Additional data:
+Additional data included here:
 - Preprocessed group-level connectivity matrices
 - Pre-transformed atlases on BigBrain
