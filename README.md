@@ -4,7 +4,7 @@ THE DEFAULT MODE NETWORK
 ![Alt text](figures/figure_methods_overview.png?raw=true "Title")
 
 
-Custom scripts to reproduce the analyses in "The Unique Cytoarchiecture and Wiring of the Human Default Mode Network"
+This repository comprises custom scripts to reproduce the analyses in "The Unique Cytoarchiecture and Wiring of the Human Default Mode Network"
  
 Dependencies:
 - BigBrainWarp (https://bigbrainwarp.readthedocs.io/en/latest/)
