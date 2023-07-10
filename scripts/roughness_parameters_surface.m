@@ -29,9 +29,17 @@ Rp = diff([mean(z); max(z)]);
 % Maximum depth of valleys
 Rv = diff([min(z); mean(z)]);
 % Mean height of peaks
-Rpm = mean(z(pks_locs)) - mean(z);
+if sum(pks_locs)~=0
+    Rpm = mean(z(pks_locs)) - mean(z);
+else
+    Rpm = 0;
+end
 % Mean depth of valleys
-Rvm = mean(z) - mean(z(vls_locs));
+if sum(vls_locs)~=0
+    Rvm = mean(z) - mean(z(vls_locs));
+else
+    Rvm = 0;
+end
 % Maximum height of the profile
 Rmax = max(z);
 % Profile solidarity factor
@@ -48,7 +56,11 @@ slm = SurfStatLinMod(rand_data,1,surf);
 slm = SurfStatT(slm, ones(10,1));
 slm.t = pks_locs';
 [~, ~, clusid] = SurfStatPeakClus(slm, ones(1,length(pks_locs)), 0.5);
-Pc = max(clusid);
+if ~isempty(clusid)
+    Pc = max(clusid);
+else
+    Pc = 0;
+end
 % Mean spacing of adjacent local peaks - adapted to avg. Euclidean distance
 % between centroids
 pks_cent = [];
@@ -65,7 +77,11 @@ Sm = mean(tmp);
 n0 = length(n0_list);
 % mean radius or asperities - adapted be average size of peaks
 tmp = tabulate(clusid);
-rp = mean(tmp(2:end,2));
+if ~size(tmp,1) > 1
+    rp = mean(tmp(2:end,2));
+else
+    rp = 0;
+end
 
 % HYBRID PARAMETERS
 % Slope at mean line  - adapted to absolute slope
@@ -91,4 +107,4 @@ param = table(Ra, Rq, Rp, Rv, Rpm, Rvm, Rmax, k, Rsk, Rku, Pc, S, Sm, n0, rp, ..
     gamma, delta_a, delta_q, lambda_a, lambda_q, Sf, Wf, ...
     'VariableNames', {'Ra', 'Rq', 'Rp', 'Rv', 'Rpm', 'Rvm', 'Rmax', 'k', ...
     'Rsk', 'Rku', 'Pc', 'S', 'Sm', 'n0', 'rp', 'gamma', 'delta_a', ...
-    'delta_q', 'lambda_a', 'lambda_q', 'Sf', 'Wf'})
+    'delta_q', 'lambda_a', 'lambda_q', 'Sf', 'Wf'});
