@@ -5,16 +5,19 @@ THE DEFAULT MODE NETWORK
 
 
 This repository comprises custom scripts to reproduce the analyses in "The Unique Cytoarchiecture and Wiring of the Human Default Mode Network"
- 
-Dependencies:
-- BigBrainWarp (https://bigbrainwarp.readthedocs.io/en/latest/)
-- micaopen (https://github.com/MICA-MNI/micaopen)
-- Freesurfer fsaverage5 subject directory (https://surfer.nmr.mgh.harvard.edu/)
-- Gifti matlab (https://www.artefact.tk/software/matlab/gifti/)
-- BrainSpace (https://github.com/MICA-MNI/BrainSpace)
-- Functional network atlas: Yeo2011_7Networks_N1000 (https://github.com/ThomasYeoLab/CBIG/blob/master/stable_projects/brain_parcellation/Yeo2011_fcMRI_clustering/1000subjects_reference/Yeo_JNeurophysiol11_SplitLabels/fsaverage5/label/)
-- Von Economo atlas on fsaverage (http://www.dutchconnectomelab.nl/economo/)
 
-Additional data included here:
-- Preprocessed group-level connectivity matrices
-- Pre-transformed atlases on BigBrain
+
+### Key scripts and what it contains
+cytoarchitecture.m
+- Evaluates the heterogeneity of the DMN according to on cortical types
+- Fine-grained cytoarchitectural mapping of the DMN using a 3D reconstruction of human brain histology and non-linear manifold learning
+- Comparison of DMN subregions based on the topography of their cytoarchitectural patterns (i.e. smooth or wavy)
+
+connectivity_and_cytoarchitecture.m
+- Relationship between connectivity and the principle axis of cytoarchitectural variation in the DMN, and how this varies depending on the cortical type
+- Evaluates the balance of extrinsic connectivity of the DMN with respect to cortical types
+- This code generally works with any parcellated connectome. Data is made available to replicate our analyses, which focus on navigation efficiency derived from diffusion-weighted tractography as well as afferent and efferent connectivity derived from dynamic causal modelling of resting-state fMRI
+
+ 
+### Contact
+Feel free to get in touch if you have any questions
