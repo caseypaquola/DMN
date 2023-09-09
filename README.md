@@ -3,7 +3,7 @@ THE DEFAULT MODE NETWORK
 
 ![Alt text](figures/figure_methods_overview.png?raw=true "Title")
 
-If you've found your way to this GitHub, then I assume you've read our paper "The Unique Cytoarchiecture and Wiring of the Human Default Mode Network". Cool! If you would like to dig deeper into the methods or reproduce aspects of the analyses, then please follow through these scripts.
+Welcome to the code repository of "The Unique Cytoarchiecture and Wiring of the Human Default Mode Network". If you would like to dig deeper into the methods or reproduce aspects of the analyses, then please follow through these scripts.
 
 
 ### 👩‍💻️ Key scripts
