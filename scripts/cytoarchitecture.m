@@ -18,7 +18,10 @@ for init_project = 1
     % addpaths of github repos - micaopen, BigBrainWarp, gifti toolbox,
     % munesoft, BrainSpace, toolbox_fast_marching
     addpath([homeDir '/scripts/']);                         % from project-specific GitHub                     
+    addpath([fsDir '/matlab/'])
     addpath(genpath([GH '/micaopen/surfstat']));            % surfstat toolbox, housed in micaopen (from MICA Lab)         
+    addpath(genpath([GH '/BrainStat/brainstat_matlab/']));
+    addpath(genpath([GH '/BrainSpace/matlab/']));
     addpath([bbwDir '/scripts/']);                          % BigBrainWarp code                     
     addpath(genpath([GH '/gifti']));                        % gifti toolbox
     addpath(genpath([GH '/toolbox_fast_marching']));        % fast marching toolbox (caution: compiling may not work on Apple Silicon chips)
@@ -39,11 +42,12 @@ for init_project = 1
     % load surfaces
     BB = SurfStatAvSurf({[bbwDir '/spaces/tpl-bigbrain/tpl-bigbrain_hemi-L_desc-pial_sym.obj'], ...
      [bbwDir '/spaces/tpl-bigbrain/tpl-bigbrain_hemi-R_desc-pial_sym.obj']}); % BigBrain pial surface
-    BBinf = SurfStatAvSurf({[homeDir '/utilities/tpl-bigbrain_hemi-L.inflated'], ...
-     [homeDir '/utilities/tpl-bigbrain_hemi-R.inflated']});                   % inflated BigBrain surface
+    BBinf = SurfStatAvSurf({[homeDir '/utilities//tpl-bigbrain/tpl-bigbrain_hemi-L.inflated'], ...
+     [homeDir '/utilities//tpl-bigbrain/tpl-bigbrain_hemi-R.inflated']});                   % inflated BigBrain surface
     BBinf.coord(1,1:end/2) = BBinf.coord(1,1:end/2) - 100;                    % need to inflated BigBrain surface shift for visualisation because mris_inflate (a freesurfer tool used to create this) changes the origin
-    load([homeDir '/utilities/tpl-bigbrain_desc-wall.mat'], 'BB_wall');       % predefined cortical wall for BigBrain
+    load([homeDir '/utilities//tpl-bigbrain/tpl-bigbrain_desc-wall.mat'], 'BB_wall');       % predefined cortical wall for BigBrain
     FS = SurfStatAvSurf({[fsAv '/surf/lh.pial'], [fsAv '/surf/rh.pial']});    % fsaverage5 pial surface
+    FSinf = SurfStatAvSurf({[fsAv '/surf/lh.inflated'], [fsAv '/surf/rh.inflated']});
     
 end
 
@@ -92,18 +96,20 @@ for overlap_of_types_and_networks = 1
     supp_table_1 = (econ_prop(2:end,2:end)./repmat(sum(econ_prop(2:end,2:end)),6,1))'
     for ii = 1:7
         [~,econ_chi(ii)] = crosstab(econ_types_fs,atlas7_fs==ii+1); % chi squared test for equivalence of proportions
-        [~,p(ii),ks(ii)] = kstest2(econ_types_fs(atlas7_fs==ii+1), econ_types_fs(dmn_fs));
+        [~,p(ii),ks(ii)] = kstest2(econ_types_fs(atlas7_fs==ii+1), econ_types_fs(dmn_fs)); % do distributions differ between dmn and other networks?
     end
     
     % proportion in each type (within dmn)
-    econ_chi_perm = [];
-    [econ_prop,econ_chi,p] = crosstab(econ_types_fs,dmn_fs); % chi squared test for equivalence of proportions
-    parfor p = 1:nperm  % takes a a minute or two
-        [econ_prop_perm(:,:,p),econ_chi_perm(p),~] = crosstab(econ_types_fs,atlas7_fs(perm_id(:,p))==8);
+    econ_prop_p = [];
+    for ii = 1:7
+        parfor p = 1:nperm  % takes a a minute or two
+            [econ_prop_perm(:,:,p),econ_chi_perm(p),~] = crosstab(econ_types_fs,atlas7_fs(perm_id(:,p))==ii+1);
+        end
+        [econ_prop,econ_chi] = crosstab(econ_types_fs,atlas7_fs==ii+1); % chi squared test for equivalence of proportions
+        prop_zeros(:,ii) = mean(squeeze(econ_prop_perm(:,2,:))==0,2);
+        econ_prop_p(:,ii) = 1 - (sum(econ_prop(:,2)<squeeze(econ_prop_perm(:,2,:)),2)/nperm);
     end
-    econ_prop_p(:,1) = 1 - (sum(econ_prop(:,2)'<squeeze(econ_prop_perm(:,2,:))')/nperm);
-    econ_prop_p(:,2) = 1 - (sum(econ_prop(:,2)'>squeeze(econ_prop_perm(:,2,:))')/nperm);
-    
+        
     for figure_types = 1
         
         f = figure('units','centimeters','outerposition',[0 0 20 20]);
@@ -140,6 +146,7 @@ for data_driven_axis = 1
     
     run_downsample = 0;
     run_embedding = 0;
+    run_alternative_dim_red = 1;
     
     if run_downsample == 1
         % downsample BB using mesh decimation
@@ -190,6 +197,19 @@ for data_driven_axis = 1
         save([homeDir '/output/bigbrain_embedding_100k_thresh.mat'], 'embedding', 'results')
     else
         load([homeDir '/output/bigbrain_embedding_100k_thresh.mat'], 'embedding', 'results')
+    end
+
+    if run_alternative_dim_red == 1
+        approaches = {'pca', 'le', 'dm'};
+        thresh = [50:10:90];
+        for ii = 1:numel(approaches)
+            embedding_alt = GradientMaps('kernel','na','approach',approaches{ii});
+            for jj = 1:numel(thres)
+                embedding_alt = embedding_alt.fit(BB_MPC, 'sparsity', thresh(jj));
+                alt_r(ii,jj) = corr(embedding(:,1), embedding_alt.gradients{1}(:,1));
+                alt_lambda(ii,jj) = embedding_alt.gradients.
+            end
+        end
     end
 
     % project back to the cortical surface of BB
@@ -465,4 +485,74 @@ for subregion_analysis = 1
     end
     exportfigbo(f, [homeDir '/figures/subregion_landscapes.png'], 'png', 4)
     
+end
+
+for functional_decoding_types = 1
+
+
+    % neurosynth decoding of subregions of each type
+    clear top_features
+    for ii = 1:6
+        rand_data = rand(10, length(FS.coord));
+        slm = SurfStatLinMod(rand_data,1,FS);
+        slm = SurfStatT(slm, ones(10,1));
+        slm.t = double(econ_types_fs==ii);
+        [peak, clus, clusid] = SurfStatPeakClus(slm, ones(1,length(slm.t)), 0.5);
+        lh_clus = unique(clusid(1:end/2));
+        lh_clus(lh_clus==0) = [];
+      
+        for jj = 1:length(lh_clus)
+            [correlation, feature] = meta_analytic_decoder(double(clusid==lh_clus(jj)), ...
+                'template', 'fsaverage5');
+            top_features{ii,jj,1} = feature(correlation>2)';
+            top_features{ii,jj,2} = correlation(correlation>2);
+        end
+    end
+
+    % manually create select_features that excludes non-psych terms
+    save([homeDir '/output/neurosynth_select_features.mat'], 'select_features')
+
+    % 
+    for ii = 1:6
+        for jj = 1:size(select_features,2)
+            if jj == 1
+                top_features_type{ii,1} = top_features{ii,jj,1}(select_features{ii,jj});
+                top_features_type{ii,2} = top_features{ii,jj,2}(select_features{ii,jj});
+                top_features_type{ii,3} = [ones(length(select_features{ii,jj}),1)*jj];
+            else
+                top_features_type{ii} = [top_features_type{ii,1}; top_features{ii,jj,1}(select_features{ii,jj})];
+                top_features_type{ii,2} = [top_features_type{ii,2}; top_features{ii,jj,2}(select_features{ii,jj})];
+                top_features_type{ii,3} = [top_features_type{ii,3}; [ones(length(select_features{ii,jj}),1)*jj]];
+            end
+        end
+    end
+
+
+    f = figure('units','centimeters','outerposition',[0 0 20 20]);
+
+    for ii = 1:6
+
+        BoSurfStat_calibrate4ViewsNoShade(double(econ_types_fs==ii), FSinf, ...
+        [(ii*0.167)-0.167 0.87 0.15 0.15; (ii*0.167)-0.167 0.76 0.15 0.15; ...
+        0.05 0.8 0 0; 0.05 0.8 0 0], ...
+        1:4, [0 1], [1 1 1; cmap_types(ii,:)])
+
+        if ii > 3
+            a(ii) = axes('position', [(ii*0.167)-0.167 0.6 0.15 0.15]);
+            wc1 = wordcloud(top_features_type{ii,1},top_features_type{ii,2});
+            wc1.HighlightColor = cmap_types(ii,:);
+            wc1.Color = cmap_types(ii,:);
+        else
+            for jj = 1:length(top_features_type{ii})
+                a(ii) = axes('position', [(ii*0.167)-0.167 0.75-(jj*0.15) 0.15 0.15]);
+                wc1 = wordcloud(top_features_type{ii,1}(top_features_type{ii,3}==jj),...
+                    top_features_type{ii,2}(top_features_type{ii,3}==jj));
+                wc1.HighlightColor = cmap_types(ii,:);
+                wc1.Color = cmap_types(ii,:);
+            end
+        end
+    end
+    exportfigbo(f, [homeDir '/figures/neurosynth_type_clouds.png'], 'png', 10)
+
+
 end
